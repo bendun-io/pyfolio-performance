@@ -1,9 +1,5 @@
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
 
-# from .helpers import *
-# from .classDepot import *
-# from .classDepotTransaction import *
-
 class CrossEntry(PortfolioPerformanceObject):
 
     crossEntryQueue = []
@@ -55,3 +51,7 @@ class CrossEntry(PortfolioPerformanceObject):
             return # TODO Just for the moment
             #raise RuntimeError("Cannot parse Transaction")
         otherDepot.transactions.append(crossTransaction)
+
+from .helpers import *
+from .classDepot import *
+from .classDepotTransaction import *

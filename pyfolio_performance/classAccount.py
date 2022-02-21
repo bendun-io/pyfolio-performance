@@ -1,5 +1,4 @@
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
-from .classTransaction import *
 
 class Account(PortfolioPerformanceObject):
 
@@ -38,3 +37,5 @@ class Account(PortfolioPerformanceObject):
         if self.name != None:
             return "Account/"+self.name
         return "Account/"+self.reference
+
+from .classTransaction import *

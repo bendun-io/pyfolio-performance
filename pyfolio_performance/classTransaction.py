@@ -1,10 +1,5 @@
 import xml.etree.ElementTree as ElementTree
-
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
-from .classSecurity import *
-from .classCrossEntry import *
-from .classDateObject import *
-from .helpers import *
 
 class Transaction(PortfolioPerformanceObject):
 
@@ -87,3 +82,9 @@ class Transaction(PortfolioPerformanceObject):
             CrossEntry.crossEntryQueue.append(crossEntry)
         
         return Transaction(xml, tType, tDate)
+
+
+from .classSecurity import *
+from .classCrossEntry import *
+from .classDateObject import *
+from .helpers import *

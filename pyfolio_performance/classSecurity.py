@@ -1,5 +1,4 @@
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
-from .classDateObject import *
 
 class Security(PortfolioPerformanceObject):
     
@@ -75,3 +74,5 @@ class Security(PortfolioPerformanceObject):
 
     def __repr__(self) -> str:
         return "Security/%s" % self.name
+
+from .classDateObject import *

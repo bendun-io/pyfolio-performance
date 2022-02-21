@@ -1,5 +1,4 @@
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
-from .classDepotTransaction import *
 
 class Depot(PortfolioPerformanceObject):
 
@@ -69,3 +68,6 @@ class Depot(PortfolioPerformanceObject):
 
     def __repr__(self):
         return "Depot/%s" % self.name
+
+
+from .classDepotTransaction import *

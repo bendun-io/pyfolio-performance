@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as ElementTree
-from .classPortfolio import *
 
 def printXml(xml):
     if xml == None:
@@ -15,3 +14,6 @@ def resolveXmlReference(entry, reference):
     if reference[:3] == "../":
         return resolveXmlReference(Portfolio.parent_map[entry], reference[3:])
     return entry.find(reference)
+
+
+from .classPortfolio import *

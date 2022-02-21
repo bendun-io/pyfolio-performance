@@ -1,9 +1,5 @@
 import xml.etree.ElementTree as ElementTree
 
-from .classAccount import *
-from .classDepot import *
-from .classCrossEntry import *
-
 class Portfolio:
 
     parent_map = {}
@@ -74,3 +70,8 @@ class Portfolio:
                 continue
             clusterId = fn_getClusterId(clusters, transact)
             clusters[clusterId] = fn_aggregation(clusters[clusterId], transact)
+
+
+from .classAccount import *
+from .classDepot import *
+from .classCrossEntry import *
