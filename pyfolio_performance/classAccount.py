@@ -36,6 +36,6 @@ class Account(PortfolioPerformanceObject):
     def __repr__(self) -> str:
         if self.name != None:
             return "Account/"+self.name
-        return "Account/"+self.reference
+        return "Account/%s: %d" % (self.reference, self.getBalance())
 
 from .classTransaction import *

@@ -10,3 +10,6 @@ if __name__ == "__main__":
     # Testing the methods
     print(Security.getSecurityByIsin("US88579Y1010").name)
     print(Security.getSecurityByWkn("878841").name)
+
+    print(portPerf.getAccounts())
+    print(portPerf.getDepots())
