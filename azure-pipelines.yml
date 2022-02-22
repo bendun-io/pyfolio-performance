@@ -30,16 +30,20 @@ steps:
     pip install pytest pytest-azurepipelines
     pytest
   displayName: 'pytest'
+
 - script: |
-    python setup.py sdist
+    pip install wheel twine
+    python setup.py sdist bdist_wheel
+    twine check dist/*
   displayName: 'Artifact creation'
 
-- task: CopyFiles@2
+- task: TwineAuthenticate@1
+  displayName: Twine Authenticate
   inputs:
-    targetFolder: $(Build.ArtifactStagingDirectory)
+    # In this case, name of the service connection is "pypitest".
+    pythonUploadServiceConnection: pypitest
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'dist'
-    publishLocation: 'Container'
+# Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
+- script: |
+    python -m twine upload --skip—existing -r "pypitest" --config-file $(PYPIRC_PATH) dist/*.whl
+  displayName: 'Upload to test.pypi.com'
