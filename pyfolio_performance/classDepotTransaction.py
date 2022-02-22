@@ -23,6 +23,9 @@ class DepotTransaction(Transaction):
     def getSecurity(self):
         return self.security
 
+    def getValue(self):
+        return self.getShares() * self.getSecurity().getMostRecentValue()
+
     @staticmethod
     def parseByXml(xml):
         rslt = Transaction.parseByXml(xml)
