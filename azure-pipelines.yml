@@ -43,5 +43,6 @@ steps:
 
 # Use command line script to 'twine upload', use -r to pass the repository name and --config-file to pass the environment variable set by the authenticate task.
 - script: |
+    sed -i 's/username=build/username=__token__/g' $(PYPIRC_PATH)
     python -m twine upload --skip-existing --config-file $(PYPIRC_PATH) dist/*.whl
   displayName: 'Upload to test.pypi.com'
