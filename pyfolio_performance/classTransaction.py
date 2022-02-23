@@ -6,6 +6,21 @@ class Transaction(PortfolioPerformanceObject):
     negative = ['TRANSFER_OUT', 'REMOVAL', 'INTEREST_CHARGE', 'FEES', 'TAXES', 'BUY']
     positive = ['INTEREST', 'DEPOSIT', 'TRANSFER_IN', 'DIVIDENDS', 'SELL', 'FEES_REFUND']
 
+    sourceMap = {
+        'TRANSFER_IN': lambda x: 'Transfer',
+        'TRANSFER_OUT': lambda x: 'Transfer',
+        'DEPOSIT': lambda x: 'Transfer',
+        'REMOVAL': lambda x: 'Type Removal',
+        'INTEREST_CHARGE': lambda x: x.getAccountName(),
+        'INTEREST': lambda x: x.getAccountName(),
+        'TAXES': lambda x: 'Tax',
+        'FEES': lambda x: x.getSecurity().getName() if x.getSecurity() != None else x.getAccountName(),
+        'FEES_REFUND': lambda x: x.getSecurity().getName() if x.getSecurity() != None else x.getAccountName(),
+        'DIVIDENDS': lambda x: x.getSecurity().getName(),
+        'SELL': lambda x: 'Trading',
+        'BUY': lambda x: 'Trading'
+    }
+
     def __init__(self, xml, tType, date):
         self.xml = xml
         self.type = tType
@@ -23,8 +38,6 @@ class Transaction(PortfolioPerformanceObject):
 
     # <currencyCode>EUR</currencyCode> // Assuming all is EUR for the moment
     def getValue(self):
-        # <amount>17700</amount>
-        # <shares>0</shares>
         try:
             val = int(self.xml.find("amount").text)
             if self.type in Transaction.negative:
@@ -50,11 +63,18 @@ class Transaction(PortfolioPerformanceObject):
     def getDay(self):
         return self.date.getDay()
 
+    def getSourceName(self):
+        if self.type in Transaction.sourceMap:
+            return Transaction.sourceMap[self.type](self)
+        return self.getSecurity().getName() # dont know the type of transaction
+
     def getSecurity(self):
         return self.computeSecurity()
 
     def computeSecurity(self):
         security = self.xml.find("security")
+        if security == None:
+            return None
         if "reference" not in security.attrib:
             raise RuntimeError("ERROR: Security not as a reference in the transaction!")
         

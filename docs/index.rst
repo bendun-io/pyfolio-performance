@@ -10,7 +10,7 @@ Welcome to Pyfolio Performance's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   source/api/portfolio
 
 Indices and tables
 ==================

@@ -1,6 +1,15 @@
 import xml.etree.ElementTree as ElementTree
 
 class Portfolio:
+    """
+    The main class to parse and access different aspects of a portfolio stored in a XML file.
+
+    Uses the XML file created by portfolio performance.
+
+    :param filename: The path of the XML file to parse.
+    :type filename: str
+    """
+
 
     parent_map = {}
 
@@ -9,14 +18,20 @@ class Portfolio:
         self.root = self.tree.getroot()
         Portfolio.parent_map = {c: p for p in self.tree.iter() for c in p}
 
-        self.accList = self.getAccountsPrep()
-        self.depotList = self.getDepotsPrep()
+        self.accList = self._getAccountsPrep()
+        self.depotList = self._getDepotsPrep()
         CrossEntry.processCrossEntries()
 
     def getDepots(self):
+        """
+        Returns the list of Depot objects in the portfolio.
+
+        :return: The extracted Depot list.
+        :type: list(Depot)
+        """
         return self.depotList
 
-    def getDepotsPrep(self):
+    def _getDepotsPrep(self):
         depotList = []
         for c in self.root.iter("portfolio"):
             theDepot = Depot.parse(self.root, c)
@@ -29,9 +44,15 @@ class Portfolio:
         return depotList
 
     def getAccounts(self):
+        """
+        Returns the list of Account objects in the portfolio.
+
+        :return: The extracted Account list.
+        :type: list(Account)
+        """
         return self.accList
 
-    def getAccountsPrep(self):
+    def _getAccountsPrep(self):
         accs = None
         for child in self.root:
             if child.tag == "accounts":
@@ -46,6 +67,15 @@ class Portfolio:
         return accountList
 
     def getShares(self, theSecurity):
+        """
+        Returns the number of shares that the given security objects has in the portfolio overall.
+        
+        :param theSecurity: The security queried.
+        :type theSecurity: Security
+
+        :return: The number of shares in all depots summed up.
+        :type: float
+        """
         if theSecurity == None:
             return 0 # if it is not in, we dont have it in the Portfolio
         
@@ -57,6 +87,12 @@ class Portfolio:
         return val
 
     def getTotalTransactions(self):
+        """
+        Returns the list of all transactions in the portfolio across all depots and accounts.
+
+        :return: The extracted transaction list.
+        :type: list(Transaction)
+        """
         totalTransactions = []
         for depot in self.getDepots():
             totalTransactions.extend(depot.getTransactions())
@@ -65,6 +101,26 @@ class Portfolio:
         return totalTransactions
 
     def evaluateCluster(self, clusters, fn_filter, fn_getClusterId, fn_aggregation):
+        """
+        Evaluates all transactions of the portfolio as follows.
+        Every transaction that is successfully filtered by fn_filter, gets put in a cluster through fn_getClusterId.
+        The objects in the cluster are aggregated through the fn_aggregation function.
+        
+        :parameter clusters: The overall clusters.
+        :type clusters: dict(object) / {k->v}
+
+        :parameter fn_filter: Filter function. An entry needs to pass the filter with True to be considered.
+        :type fn_filter: function(transaction) -> bool
+
+        :parameter fn_getClusterId: Given the cluster and the transaction, this method gives the key to the cluster the transaction belongs to.
+        :type fn_getClusterId: function({k->v}, Transaction) -> k
+
+        :parameter fn_aggregation: The aggregation function that combines cluster values. This updates the cluster itself at the position cluster-id for every considered transaction.
+        :type fn_aggregation: function(v, Transaction) -> v
+
+        :return: Nothing is returned.
+        :type: None
+        """
         for transact in self.getTotalTransactions():
             if not fn_filter(transact):
                 continue
