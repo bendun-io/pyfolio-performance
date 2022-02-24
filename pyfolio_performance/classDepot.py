@@ -1,6 +1,9 @@
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
 
 class Depot(PortfolioPerformanceObject):
+    """
+    The class that manages a depot and its transactions.
+    """
 
     referenceSkip = 6
     depotMap = {}
@@ -15,16 +18,34 @@ class Depot(PortfolioPerformanceObject):
         Depot.depotMap[name] = self
 
     def getName(self):
+        """
+        :return: Name of the depot.
+        :type: str
+        """
         return self.name
 
     @staticmethod
     def getDepotByName(name):
+        """
+        If no such Depot exists, it returns an empty depot with the name.
+        If it exists, it returns the corresponding Depot.
+
+        :param: Name of the depot that should be returned
+        :type: str
+
+        :return: Existing or new Depot
+        :type: Depot
+        """
         if name in Depot.depotMap.keys():
             return Depot.depotMap[name]
 
         return Depot(name, None)
 
     def getSecurities(self):
+        """
+        :return: Mapping of currently Securities to the number of contained shares
+        :type: dict(Security -> float)
+        """
         if self.depotSecurities != None:
             return self.depotSecurities
         self.depotSecurities = {}
@@ -64,9 +85,13 @@ class Depot(PortfolioPerformanceObject):
         return rslt
         
     def getTransactions(self):
+        """
+        :return: list of transactions in the depot.
+        :type: list(Transaction)
+        """
         return self.transactions
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "Depot/%s" % self.name
 
 

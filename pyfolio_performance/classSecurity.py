@@ -1,7 +1,10 @@
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
 
 class Security(PortfolioPerformanceObject):
-    
+    """
+    A class that manages securities.
+    """
+
     referenceSkip = 0
     securityNameMap = {}
     securityIsinMap = {}
@@ -21,6 +24,10 @@ class Security(PortfolioPerformanceObject):
             Security.securityWknMap[wkn] = self
 
     def getMostRecentValue(self):
+        """
+        :return: Current security price from the file in Euro.
+        :type: float
+        """
         if self.mostRecentValue != None:
             return self.mostRecentValue
         
@@ -40,26 +47,51 @@ class Security(PortfolioPerformanceObject):
         self.mostRecentValue = int(newestXml.attrib['v'])/self.pricescale
         return self.mostRecentValue
 
-    def getName(self):
+    def getName(self) -> str:
+        """
+        :return: Name of the security
+        :type: str
+        """
         return self.name
 
     @staticmethod
-    def getSecurityByMap(map, key):
+    def _getSecurityByMap(map, key):
         if key in map:
             return map[key]
         return None
 
     @staticmethod
     def getSecurityByName(name):
-        return Security.getSecurityByMap(Security.securityNameMap, name)
+        """
+        :param: Name of security that should be returned.
+        :type: str
+
+        :return: existing security object or None 
+        :type: Security
+        """
+        return Security._getSecurityByMap(Security.securityNameMap, name)
 
     @staticmethod
     def getSecurityByIsin(isin):
-        return Security.getSecurityByMap(Security.securityIsinMap, isin)
+        """
+        :param: Isin of security that should be returned.
+        :type: str
+
+        :return: existing security object or None 
+        :type: Security
+        """
+        return Security._getSecurityByMap(Security.securityIsinMap, isin)
 
     @staticmethod
     def getSecurityByWkn(wkn):
-        return Security.getSecurityByMap(Security.securityWknMap, wkn)
+        """
+        :param: Wkn of security that should be returned.
+        :type: str
+
+        :return: existing security object or None 
+        :type: Security
+        """
+        return Security._getSecurityByMap(Security.securityWknMap, wkn)
 
     @staticmethod
     def parseByXml(xml):

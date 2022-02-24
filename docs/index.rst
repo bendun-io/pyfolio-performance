@@ -11,6 +11,9 @@ Welcome to Pyfolio Performance's documentation!
    :caption: Contents:
 
    source/api/portfolio
+   source/api/account
+   source/api/depot
+   source/api/security
 
 Indices and tables
 ==================
