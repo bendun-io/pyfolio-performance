@@ -13,7 +13,7 @@ class Transaction(PortfolioPerformanceObject):
         'REMOVAL': lambda x: 'Type Removal',
         'INTEREST_CHARGE': lambda x: x.getAccountName(),
         'INTEREST': lambda x: x.getAccountName(),
-        'TAXES': lambda x: 'Tax',
+        'TAXES': lambda x: x.getSecurity().getName() if x.getSecurity() != None else 'Tax',
         'FEES': lambda x: x.getSecurity().getName() if x.getSecurity() != None else x.getAccountName(),
         'FEES_REFUND': lambda x: x.getSecurity().getName() if x.getSecurity() != None else x.getAccountName(),
         'DIVIDENDS': lambda x: x.getSecurity().getName(),
