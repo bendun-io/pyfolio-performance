@@ -14,6 +14,7 @@ Welcome to Pyfolio Performance's documentation!
    source/api/account
    source/api/depot
    source/api/security
+   source/api/pp_object
 
 Indices and tables
 ==================
