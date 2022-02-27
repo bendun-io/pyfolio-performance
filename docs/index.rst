@@ -6,15 +6,16 @@
 Welcome to Pyfolio Performance's documentation!
 ===============================================
 
+Installation can be done through ``pip install pyfolio-performance`` or via `Github`_.
+
+.. _Github: https://github.com/bendun-io/pyfolio-performance
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   source/api/portfolio
-   source/api/account
-   source/api/depot
-   source/api/security
-   source/api/pp_object
+   source/api
+   source/examples
 
 Indices and tables
 ==================

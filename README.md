@@ -10,34 +10,4 @@ pip install pyfolio-performance
 
 ## Get started
 
-This is a small example for loading a portfolio performance file and getting account information.
-
-### Looking into Accounts
-
-
-from pyfolio-performance import Portfolio
-
-portfolio = Portfolio("portfolio.xml")
-print(portfolio.getAccounts())
-
-
-The result will look like:
-
-[]
-
-
-
-### Looking into Depots
-
-You can also display the securities in a Depot.
-
-
-from pyfolio-performance import Portfolio
-
-portfolio = Portfolio("portfolio.xml")
-print(portfolio.getDepots())
-
-
-The result will look like:
-
-[Depot/Comdirect, Depot/Consorsbank]
+The documentation and examples can be found here: https://pyfolio-performance.readthedocs.io/en/latest/
