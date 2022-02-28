@@ -25,18 +25,33 @@ class Transaction(PortfolioPerformanceObject):
         self.xml = xml
         self.type = tType
         self.date = DateObject(date)
-        self.accountName = None
+        self._accountName = None
         
     def __repr__(self) -> str:
+        """
+        :return: String representation of the transaction of the form Transaction(TYPE, DATE).
+        :type: str
+        """
         return "Transaction(%s, %s)" % (self.type, str(self.date))
 
     def setAccountName(self, name):
-        self.accountName = name
+        """
+        Setter method for the account name.
+
+        :param name: Name of the account.
+        :type name: str
+        """
+        self._accountName = name
     
     def getAccountName(self):
-        return self.accountName
+        """
+        Getter method for the account name.
 
-    # <currencyCode>EUR</currencyCode> // Assuming all is EUR for the moment
+        :return: Name of the account.
+        :type: str
+        """
+        return self._accountName
+
     def getValue(self):
         try:
             val = int(self.xml.find("amount").text)
@@ -55,12 +70,30 @@ class Transaction(PortfolioPerformanceObject):
         return int(self.xml.find("shares").text)
 
     def getYear(self):
+        """
+        Getter method for the year of the underlying date object.
+
+        :return: year of the transaction.
+        :type: int
+        """
         return self.date.getYear()
 
     def getMonth(self):
+        """
+        Getter method for the month of the underlying date object.
+
+        :return: month of the transaction.
+        :type: int
+        """
         return self.date.getMonth()
 
     def getDay(self):
+        """
+        Getter method for the day of the underlying date object.
+
+        :return: day of the transaction.
+        :type: int
+        """
         return self.date.getDay()
 
     def getSourceName(self):

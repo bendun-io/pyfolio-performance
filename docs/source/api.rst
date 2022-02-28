@@ -11,4 +11,5 @@ In the following, we have the documentation of the library's classes.
    api/depot
    api/security
    api/pp_object
+   api/date_object
    api/filter
