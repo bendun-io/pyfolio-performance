@@ -9,6 +9,68 @@ class PortfolioPerformanceObject:
     parsed = {}
     referenceSkip = 3
 
+    _attributeList = []
+    _attributes = {}
+    _attribObjectMap = {}
+
+    def _getAttribute(self, name):
+        """
+        :param name: the name of the attribute
+        :type name: str
+
+        :return: the stored value
+        :type: arbitrary
+        """
+        if name in self._attributes.keys():
+            return self._attributes[name]
+        return None
+
+
+    def _setAttribute(self, name, value):
+        """
+        :param name: name of the attribute
+        :type name: str
+
+        :param value: value to store
+        :type value: arbitrary
+        """
+        self._attributes[name] = value
+
+        # Connect attribute to the corresponding class map
+        if not name in self.__class__._attribObjectMap:
+            self.__class__._attribObjectMap[name] = {}
+        self.__class__._attribObjectMap[name][value] = self
+
+    def parseAttributes(self):
+        for name in self._attributeList:
+            txt = self.xml.find(name)
+            if txt == None:
+                continue
+            self._setAttribute(name, txt.text)
+
+    @classmethod
+    def getObjectByAttribute(cls, attr, value):
+        """
+        Note it only works if there is a single object for the attribute and the value.
+        For example, we can ask for the attribute `isin` of a security with the value `DE0005190003` leading to BMW.
+
+        :param attr: the attribute we are looknig for
+        :type attr: str
+
+        :param value: the value the attribute should have
+        :type value: str
+
+        :return: the store object for the value
+        :type: object
+        """
+        if not attr in cls._attribObjectMap:
+            return
+        attrMap = cls._attribObjectMap[attr]
+        if not value in attrMap:
+            return
+        return attrMap[value]
+
+
     @classmethod
     def parseByReference(cls, root, reference):
         """
@@ -56,6 +118,7 @@ class PortfolioPerformanceObject:
             rslt = cls.parseByReference(root, xml.attrib['reference'])
         else:
             rslt = cls.parseByXml(xml)
-        
+            rslt.parseAttributes()
+
         cls.parsed[xml] = rslt
         return rslt

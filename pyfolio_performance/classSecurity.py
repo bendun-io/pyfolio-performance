@@ -9,19 +9,21 @@ class Security(PortfolioPerformanceObject):
     securityNameMap = {}
     securityIsinMap = {}
     securityWknMap = {}
+    mostRecentValue = None
     pricescale = 1000000 # scale factor to reach euro value
-
-    def __init__(self, xml, name, isin, wkn):
-        self.name = name
+    
+    def __init__(self, xml): #, name, isin, wkn):
+        self._attributeList = ['uuid', 'name', 'currencyCode', 'isin', 'tickerSymbol', 'wkn', 'feed']
         self.xml = xml
-        self.isin = isin
-        self.wkn = wkn
-        self.mostRecentValue = None
-        Security.securityNameMap[name] = self
-        if isin != None:
-            Security.securityIsinMap[isin] = self
-        if wkn != None:
-            Security.securityWknMap[wkn] = self
+        self.name = xml.find("name").text
+        # self.isin = isin
+        # self.wkn = wkn
+        # self.mostRecentValue = None
+        # Security.securityNameMap[name] = self
+        # if isin != None:
+        #     Security.securityIsinMap[isin] = self
+        # if wkn != None:
+        #     Security.securityWknMap[wkn] = self
 
     def getMostRecentValue(self):
         """
@@ -52,6 +54,7 @@ class Security(PortfolioPerformanceObject):
         :return: Name of the security
         :type: str
         """
+        # return self._getXmlAttribute('name')
         return self.name
 
     @staticmethod
@@ -69,7 +72,8 @@ class Security(PortfolioPerformanceObject):
         :return: existing security object or None 
         :type: Security
         """
-        return Security._getSecurityByMap(Security.securityNameMap, name)
+        return Security.getObjectByAttribute('name', name)
+        # return Security._getSecurityByMap(Security.securityNameMap, name)
 
     @staticmethod
     def getSecurityByIsin(isin):
@@ -80,7 +84,8 @@ class Security(PortfolioPerformanceObject):
         :return: existing security object or None 
         :type: Security
         """
-        return Security._getSecurityByMap(Security.securityIsinMap, isin)
+        return Security.getObjectByAttribute('isin', isin)
+        # return Security._getSecurityByMap(Security.securityIsinMap, isin)
 
     @staticmethod
     def getSecurityByWkn(wkn):
@@ -91,20 +96,23 @@ class Security(PortfolioPerformanceObject):
         :return: existing security object or None 
         :type: Security
         """
-        return Security._getSecurityByMap(Security.securityWknMap, wkn)
+        return Security.getObjectByAttribute('wkn', wkn)
+        # return Security._getSecurityByMap(Security.securityWknMap, wkn)
 
     @staticmethod
     def parseByXml(xml):
-        name = xml.find("name").text
-        isin = xml.find("isin")
-        if isin != None:
-            isin = isin.text
-        wkn  = xml.find("wkn")
-        if wkn != None:
-            wkn = wkn.text
-        return Security(xml, name, isin, wkn)
+        # name = xml.find("name").text
+        # isin = xml.find("isin")
+        # if isin != None:
+        #     isin = isin.text
+        # wkn  = xml.find("wkn")
+        # if wkn != None:
+        #     wkn = wkn.text
+        # secs = Security(xml)
+        # secs.parseAttributes()
+        return Security(xml) #, name, isin, wkn)
 
     def __repr__(self) -> str:
-        return "Security/%s" % self.name
+        return "Security/%s" % self.getName()
 
 from .classDateObject import *

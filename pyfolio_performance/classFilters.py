@@ -27,6 +27,14 @@ class Filters:
         return lambda x: False if x.type in typelist else True
 
     @staticmethod
+    def fDepotTransaction():
+        """
+        :return: A filter function that ensures the entry is a Depot Transaction.
+        :type: Entry -> bool
+        """
+        return lambda x: False if not isinstance(x, DepotTransaction) else True
+
+    @staticmethod
     def fYear(year):
         """
         :param year: The year to filter for.
@@ -86,3 +94,5 @@ class Filters:
         :type: Entry -> bool
         """
         return lambda x: f1(x) or f2(x)
+
+from .classDepotTransaction import *
