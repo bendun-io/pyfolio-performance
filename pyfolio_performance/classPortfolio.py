@@ -68,6 +68,19 @@ class Portfolio:
             accountList.append(Account.parse(accs, account))
         return accountList
 
+    def getSecurities(self):
+        """
+        Returns the list of all unique securities in any depot.
+        :return: The list.
+        :type: list(Security)
+        """
+        depotSecurities = []
+        for depot in self.getDepots():
+            for sec in depot.getSecurities().keys():
+                if sec not in depotSecurities:
+                    depotSecurities.append(sec)
+        return depotSecurities
+
     def getShares(self, theSecurity):
         """
         Returns the number of shares that the given security objects has in the portfolio overall.
