@@ -1,6 +1,10 @@
+from .classCrossEntry import *
+from .classDepot import *
+from .classAccount import *
 import xml.etree.ElementTree as ElementTree
 
 from pyfolio_performance.classFilters import Filters
+
 
 class Portfolio:
     """
@@ -11,7 +15,6 @@ class Portfolio:
     :param filename: The path of the XML file to parse.
     :type filename: str
     """
-
 
     parent_map = {}
 
@@ -39,10 +42,10 @@ class Portfolio:
             theDepot = Depot.parse(self.root, c)
             if theDepot == None:
                 continue
-            if not theDepot in depotList: # dont count them twice
+            if not theDepot in depotList:  # dont count them twice
                 depotList.append(theDepot)
-        
-        CrossEntry.processCrossEntries() # process them at the end!
+
+        CrossEntry.processCrossEntries()  # process them at the end!
         return depotList
 
     def getAccounts(self):
@@ -84,7 +87,7 @@ class Portfolio:
     def getShares(self, theSecurity):
         """
         Returns the number of shares that the given security objects has in the portfolio overall.
-        
+
         :param theSecurity: The security queried.
         :type theSecurity: Security
 
@@ -92,8 +95,8 @@ class Portfolio:
         :type: float
         """
         if theSecurity == None:
-            return 0 # if it is not in, we dont have it in the Portfolio
-        
+            return 0  # if it is not in, we dont have it in the Portfolio
+
         val = 0
         for dep in self.getDepots():
             secVals = dep.getSecurities()
@@ -127,8 +130,9 @@ class Portfolio:
         myFilter = Filters.fSecurityTransaction
         if before != None:
             myFilter = Filters.fAnd(myFilter, Filters)
-        fn_cluster = lambda x,y: 'value'
-        fn_aggregate = lambda x,y: x+y.getValue()
+
+        def fn_cluster(x, y): return 'value'
+        def fn_aggregate(x, y): return x+y.getValue()
         self.evaluateCluster(clusters, myFilter, fn_cluster, fn_aggregate)
 
         return clusters['value']
@@ -138,7 +142,7 @@ class Portfolio:
         Evaluates all transactions of the portfolio as follows.
         Every transaction that is successfully filtered by fn_filter, gets put in a cluster through fn_getClusterId.
         The objects in the cluster are aggregated through the fn_aggregation function.
-        
+
         :parameter clusters: The overall clusters.
         :type clusters: dict(object) / {k->v}
 
@@ -159,8 +163,3 @@ class Portfolio:
                 continue
             clusterId = fn_getClusterId(clusters, transact)
             clusters[clusterId] = fn_aggregation(clusters[clusterId], transact)
-
-
-from .classAccount import *
-from .classDepot import *
-from .classCrossEntry import *

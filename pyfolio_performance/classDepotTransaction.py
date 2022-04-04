@@ -1,7 +1,8 @@
 from .classTransaction import Transaction
 
+
 class DepotTransaction(Transaction):
-    
+
     referenceSkip = 6
 
     negative = ["DELIVERY_OUTBOUND", "SELL", "TRANSFER_OUT"]

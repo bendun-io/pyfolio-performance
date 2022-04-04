@@ -1,3 +1,4 @@
+from .classDepotTransaction import DepotTransaction
 
 class Filters:
     """
@@ -119,4 +120,3 @@ class Filters:
         """
         return lambda x: f1(x) or f2(x)
 
-from .classDepotTransaction import *
