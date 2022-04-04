@@ -96,6 +96,15 @@ class Transaction(PortfolioPerformanceObject):
         """
         return self.date.getDay()
 
+    def getDate(self):
+        """
+        Return the date object.
+
+        :return: The included date object.
+        :type: DateObject
+        """
+        return self.date
+
     def getSourceName(self):
         if self.type in Transaction.sourceMap:
             return Transaction.sourceMap[self.type](self)

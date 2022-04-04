@@ -35,6 +35,30 @@ class Filters:
         return lambda x: False if not isinstance(x, DepotTransaction) else True
 
     @staticmethod
+    def fSecurityTransaction(sec):
+        """
+        :param sec: A security to filter for.
+        :type sec: Security
+
+        :return: A filter function that ensures the entry is a transaction about the given security.
+        :type: Entry -> bool
+        """
+        return lambda x: False if x.getSecurity() != sec else True
+
+    @staticmethod
+    def fBefore(date):
+        """
+        :param year: The date to filter for.
+        :type year: DateObject
+
+        :return: A filter function that ensures the entry was made before or on the date (<=).
+        :type: Entry -> bool
+        """
+        return lambda x: True if (x.getYear()<date.getYear()) or \
+            (x.getYear()==date.getYear() and x.getMonth()<date.getMonth()) or \
+            (x.getYear()==date.getYear() and x.getMonth()==date.getMonth() and x.getDay()<=date.getDay()) else False
+
+    @staticmethod
     def fYear(year):
         """
         :param year: The year to filter for.

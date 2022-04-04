@@ -1,5 +1,7 @@
 import xml.etree.ElementTree as ElementTree
 
+from pyfolio_performance.classFilters import Filters
+
 class Portfolio:
     """
     The main class to parse and access different aspects of a portfolio stored in a XML file.
@@ -99,6 +101,24 @@ class Portfolio:
         for acc in self.getAccounts():
             totalTransactions.extend(acc.getTransactions())
         return totalTransactions
+
+    def getInvestmentInto(self, security, before=None):
+        """
+        Computes how much is invested into a specific security before a given date. If no date is given, the total investment is calculated.
+
+        :return: value in cents of investement
+        :type: int
+        """
+
+        clusters = {'value': 0}
+        myFilter = Filters.fSecurityTransaction
+        if before != None:
+            myFilter = Filters.fAnd(myFilter, Filters)
+        fn_cluster = lambda x,y: 'value'
+        fn_aggregate = lambda x,y: x+y.getValue()
+        self.evaluateCluster(clusters, myFilter, fn_cluster, fn_aggregate)
+
+        return clusters['value']
 
     def evaluateCluster(self, clusters, fn_filter, fn_getClusterId, fn_aggregation):
         """
