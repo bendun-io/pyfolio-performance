@@ -8,8 +8,12 @@ if __name__ == "__main__":
     print(portPerf.getShares(testSecurity)) # should be around 122
 
     # Testing the methods
-    print(Security.getSecurityByIsin("US88579Y1010").name)
+    print(Security.getSecurityByIsin("DE0005190003").getMostRecentValue())
     print(Security.getSecurityByWkn("878841").name)
 
     print(portPerf.getAccounts())
     print(portPerf.getDepots())
+
+    for sec in portPerf.getSecurities():
+        print(sec.getName())
+        print(sec.getMostRecentValue())

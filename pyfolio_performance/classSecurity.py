@@ -46,7 +46,10 @@ class Security(PortfolioPerformanceObject):
             newestDate = priceDate
             newestXml = price
         
-        self.mostRecentValue = int(newestXml.attrib['v'])/self.pricescale
+        if newestXml == None:
+            self.mostRecentValue = 0
+        else:    
+            self.mostRecentValue = int(newestXml.attrib['v'])/self.pricescale
         return self.mostRecentValue
 
     def getName(self) -> str:
