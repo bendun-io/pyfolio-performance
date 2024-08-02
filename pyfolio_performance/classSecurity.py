@@ -16,6 +16,7 @@ class Security(PortfolioPerformanceObject):
         self._attributeList = ['uuid', 'name', 'currencyCode', 'isin', 'tickerSymbol', 'wkn', 'feed']
         self.xml = xml
         self.name = xml.find("name").text
+        self.logo = None
         # self.isin = isin
         # self.wkn = wkn
         # self.mostRecentValue = None
@@ -24,6 +25,23 @@ class Security(PortfolioPerformanceObject):
         #     Security.securityIsinMap[isin] = self
         # if wkn != None:
         #     Security.securityWknMap[wkn] = self
+
+    def getLogo(self):
+        """
+        :return: Logo of the security
+        :type: str
+        """
+        if self.logo != None:
+            return self.logo
+        
+        attributes = self.xml.find("attributes")
+        
+        for attrib in attributes.find("entry"):
+            strs = [s.text for s in attrib.find("string")]
+            if strs[0] == "logo":
+                self.logo = strs[1]
+            
+        return self.logo
 
     def getMostRecentValue(self):
         """
