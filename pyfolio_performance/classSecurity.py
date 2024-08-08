@@ -9,22 +9,24 @@ class Security(PortfolioPerformanceObject):
     securityNameMap = {}
     securityIsinMap = {}
     securityWknMap = {}
+    securityNums = {}
     mostRecentValue = None
     pricescale = 1000000 # scale factor to reach euro value
     
-    def __init__(self, xml): #, name, isin, wkn):
+    def __init__(self, data): #, name, isin, wkn):
         self._attributeList = ['uuid', 'name', 'currencyCode', 'isin', 'tickerSymbol', 'wkn', 'feed']
-        self.xml = xml
-        self.name = xml.find("name").text
+        self.data = data
+        self.name = data["name"]
         self.logo = None
-        # self.isin = isin
-        # self.wkn = wkn
-        # self.mostRecentValue = None
-        # Security.securityNameMap[name] = self
-        # if isin != None:
-        #     Security.securityIsinMap[isin] = self
-        # if wkn != None:
-        #     Security.securityWknMap[wkn] = self
+        self.isin = data["isin"] if "isin" in data else None
+        self.wkn = data["wkn"] if "wkn" in data else None
+        self.mostRecentValue = None
+        Security.securityNums[data['num']] = self
+        Security.securityNameMap[self.name] = self
+        if self.isin != None:
+            Security.securityIsinMap[self.isin] = self
+        if self.wkn != None:
+            Security.securityWknMap[self.wkn] = self
 
     def getLogo(self):
         """
@@ -34,14 +36,20 @@ class Security(PortfolioPerformanceObject):
         if self.logo != None:
             return self.logo
         
-        attributes = self.xml.find("attributes")
-        
-        for attrib in attributes.find("entry"):
-            strs = [s.text for s in attrib.find("string")]
-            if strs[0] == "logo":
-                self.logo = strs[1]
+        try:
+            attributes = self.data["attributes"]["map"]["entry"]
+            
+            for string in attributes["string"]:
+                if string == "logo":
+                    continue
+                self.logo = string
+        except: # might have some None in there if no logo exists
+            pass
             
         return self.logo
+
+    def getSecurityByNum(num: int) -> 'Security':
+        return Security.securityNums[num-1] # -1 because the num starts at 1
 
     def getMostRecentValue(self):
         """
@@ -51,14 +59,14 @@ class Security(PortfolioPerformanceObject):
         if self.mostRecentValue != None:
             return self.mostRecentValue
         
-        priceList = self.xml.find("prices")
+        priceList = self.data["prices"]
         if priceList == None:
             print("No price list found for %s" % str(self))
             return 0
         newestDate = DateObject("0000-00-00")
         newestXml = None
         for price in priceList:
-            priceDate = DateObject(price.attrib['t']) 
+            priceDate = DateObject(price['@t'])
             if priceDate.getOrderValue() < newestDate.getOrderValue():
                 continue
             newestDate = priceDate
@@ -67,7 +75,7 @@ class Security(PortfolioPerformanceObject):
         if newestXml == None:
             self.mostRecentValue = 0
         else:    
-            self.mostRecentValue = int(newestXml.attrib['v'])/self.pricescale
+            self.mostRecentValue = int(newestXml['@v'])/self.pricescale
         return self.mostRecentValue
 
     def getName(self) -> str:
@@ -121,17 +129,8 @@ class Security(PortfolioPerformanceObject):
         # return Security._getSecurityByMap(Security.securityWknMap, wkn)
 
     @staticmethod
-    def parseByXml(xml):
-        # name = xml.find("name").text
-        # isin = xml.find("isin")
-        # if isin != None:
-        #     isin = isin.text
-        # wkn  = xml.find("wkn")
-        # if wkn != None:
-        #     wkn = wkn.text
-        # secs = Security(xml)
-        # secs.parseAttributes()
-        return Security(xml) #, name, isin, wkn)
+    def parseContent(data):
+        return Security(data)
 
     def __repr__(self) -> str:
         return "Security/%s" % self.getName()

@@ -1,11 +1,3 @@
-from .classCrossEntry import *
-from .classDepot import *
-from .classAccount import *
-import xml.etree.ElementTree as ElementTree
-
-from pyfolio_performance.classFilters import Filters
-
-
 class Portfolio:
     """
     The main class to parse and access different aspects of a portfolio stored in a XML file.
@@ -17,15 +9,73 @@ class Portfolio:
     """
 
     parent_map = {}
+    uuid_map = {}
+    path_map = {}
 
     def __init__(self, filename):
-        self.tree = ElementTree.parse(filename)
-        self.root = self.tree.getroot()
-        Portfolio.parent_map = {c: p for p in self.tree.iter() for c in p}
+        Portfolio.currentPortfolio = self
+        xml_content = open(filename, 'r').read()
+        self.content = xmltodict.parse(xml_content)
 
-        self.accList = self._getAccountsPrep()
-        self.depotList = self._getDepotsPrep()
+        self._parseSecurities() # needs to be done first, other parsing could depend on it being done 
+        self._parseAccounts()
+        self._parseDepots()
         CrossEntry.processCrossEntries()
+
+    def _parseSecurities(self):
+        self.securityList = []
+        num = 0
+        for sec in self.content['client']['securities']['security']:
+            sec['num'] = num
+            secObj = Security.parseContent(sec)
+            self.uuid_map[sec['uuid']] = secObj
+            self.securityList.append(secObj)
+            num += 1
+
+    def _parseAccounts(self):
+        self.accList = []
+        
+        num = 1
+        refPath = 'client/accounts/account'
+        for acc in self.content['client']['accounts']['account']:
+            acc['referencePath'] = refPath
+            if num > 1:
+                acc['referencePath'] += "[%d]" % num
+            currentAccount = Account.parse(acc)
+            self.accList.append(currentAccount)
+            num += 1
+
+        for acc in self.accList:
+            acc.resolveReference()
+
+    def _parseDepots(self):
+        self.depotList = []
+        
+        num = 1
+        refPath = 'client/portfolios/portfolio'
+        for dep in self.content['client']['portfolios']['portfolio']:
+            dep['referencePath'] = refPath
+            if num > 1:
+                dep['referencePath'] += "[%d]" % num
+            currentDepot = Depot.parse(dep)
+            self.depotList.append(currentDepot)
+            num += 1
+            
+        for dep in self.depotList:
+            dep.resolveReference()
+
+    def registerUuid(self, uuid, obj):
+        if uuid != None:
+            self.uuid_map[uuid] = obj
+
+    def registerPath(self, path, obj):
+        if path != None:
+            self.path_map[path] = obj
+
+    def getObjectByPath(self, path):
+        if path in self.path_map:
+            return self.path_map[path]
+        return None
 
     def getDepots(self):
         """
@@ -36,17 +86,6 @@ class Portfolio:
         """
         return self.depotList
 
-    def _getDepotsPrep(self):
-        depotList = []
-        for c in self.root.iter("portfolio"):
-            theDepot = Depot.parse(self.root, c)
-            if theDepot == None:
-                continue
-            if not theDepot in depotList:  # dont count them twice
-                depotList.append(theDepot)
-
-        CrossEntry.processCrossEntries()  # process them at the end!
-        return depotList
 
     def getAccounts(self):
         """
@@ -57,32 +96,19 @@ class Portfolio:
         """
         return self.accList
 
-    def _getAccountsPrep(self):
-        accs = None
-        for child in self.root:
-            if child.tag == "accounts":
-                accs = child
-                break
-        if accs == None:
-            raise RuntimeError("No Accounts found!")
-        self.accountRoot = accs
-        accountList = []
-        for account in accs:
-            accountList.append(Account.parse(accs, account))
-        return accountList
-
     def getSecurities(self):
         """
         Returns the list of all unique securities in any depot.
         :return: The list.
         :type: list(Security)
         """
-        depotSecurities = []
-        for depot in self.getDepots():
-            for sec in depot.getSecurities().keys():
-                if sec not in depotSecurities:
-                    depotSecurities.append(sec)
-        return depotSecurities
+        return self.securityList
+        # depotSecurities = []
+        # for depot in self.getDepots():
+        #     for sec in depot.getSecurities().keys():
+        #         if sec not in depotSecurities:
+        #             depotSecurities.append(sec)
+        # return depotSecurities
 
     def getShares(self, theSecurity):
         """
@@ -163,3 +189,12 @@ class Portfolio:
                 continue
             clusterId = fn_getClusterId(clusters, transact)
             clusters[clusterId] = fn_aggregation(clusters[clusterId], transact)
+
+from .classCrossEntry import *
+from .classDepot import *
+from .classAccount import *
+import xml.etree.ElementTree as ElementTree
+from .helpers import *
+
+from pyfolio_performance.classFilters import Filters
+import xmltodict

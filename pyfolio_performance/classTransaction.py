@@ -1,5 +1,5 @@
-import xml.etree.ElementTree as ElementTree
 from .classPortfolioPerformanceObject import PortfolioPerformanceObject
+import re
 
 class Transaction(PortfolioPerformanceObject):
 
@@ -20,12 +20,26 @@ class Transaction(PortfolioPerformanceObject):
         'SELL': lambda x: 'Trading',
         'BUY': lambda x: 'Trading'
     }
+    
+    referenceMap = {}
 
-    def __init__(self, xml, tType, date):
-        self.xml = xml
-        self.type = tType
-        self.date = DateObject(date)
-        self._accountName = None
+    def __init__(self, content, reference=None):
+        self.reference = reference
+        self.security = None
+        self.content = content
+        
+        Transaction.referenceMap[content['referencePath']] = self
+        Portfolio.currentPortfolio.registerPath(content['referencePath'], self)
+        
+        if reference != None:
+            return
+        
+        self._account = content['account'] if 'account' in content else None
+        self.type = content['type']
+        self.date = DateObject(content['date'])
+    
+    def to_dict(self):
+        return {"content": self.content, "reference": self.reference}
         
     def __repr__(self) -> str:
         """
@@ -34,14 +48,14 @@ class Transaction(PortfolioPerformanceObject):
         """
         return "Transaction(%s, %s)" % (self.type, str(self.date))
 
-    def setAccountName(self, name):
+    def setAccount(self, account):
         """
         Setter method for the account name.
 
         :param name: Name of the account.
         :type name: str
         """
-        self._accountName = name
+        self._account = account
     
     def getAccountName(self):
         """
@@ -50,24 +64,24 @@ class Transaction(PortfolioPerformanceObject):
         :return: Name of the account.
         :type: str
         """
-        return self._accountName
+        return self._account.name
 
     def getValue(self):
         try:
-            val = int(self.xml.find("amount").text)
+            val = int(self.content["amount"])
             if self.type in Transaction.negative:
                 val = -val
             elif self.type not in Transaction.positive:
                 print(self.type, val)
         except AttributeError:
-            print(ElementTree.tostring(self.xml, encoding='utf8', method='xml'))
+            print(self.content)
         return val
 
     def getAmount(self):
-        return int(self.xml.find("amount").text)
+        return int(self.content["amount"])
 
     def getShares(self):
-        return int(self.xml.find("shares").text)
+        return int(self.content["shares"])
 
     def getYear(self):
         """
@@ -113,40 +127,55 @@ class Transaction(PortfolioPerformanceObject):
     def getSecurity(self):
         return self.computeSecurity()
 
+    securityPattern = re.compile(r"(\.\./)*securities/security\[(\d+)\]$")
     def computeSecurity(self):
-        security = self.xml.find("security")
+        if self.security != None:
+            return True
+        
+        security = self.content['security']['@reference'] if 'security' in self.content else None
         if security == None:
-            return None
-        if "reference" not in security.attrib:
-            raise RuntimeError("ERROR: Security not as a reference in the transaction!")
+            return False
         
-        currentNode = resolveXmlReference(security, security.attrib["reference"])
-        if currentNode == None:
-            raise RuntimeError("Cannot find referenced security", security.attrib["reference"])
+        match = Transaction.securityPattern.search(security)
+        if match:
+            self.security = Security.getSecurityByNum(int(match.group(2)))
+            return True
+        elif security.endswith('securities/security'):
+            self.security = Security.getSecurityByNum(1)
+            return True
 
-        return Security.parse(self.xml, currentNode)
+        raise RuntimeError("Security could not be resolved for transaction pattern '%s'" % security)
 
+    #   {
+    #     "uuid": "6ff55ee0-f3c7-410c-812b-424ad293ce97",
+    #     "date": "2018-01-01T00:00",
+    #     "currencyCode": "EUR",
+    #     "amount": "899430",
+    #     "shares": "0",
+    #     "updatedAt": "2021-04-19T13:12:20.101395100Z",
+    #     "type": "DEPOSIT"
+    #   },
+    
     @staticmethod
-    def parseByXml(xml):
-        tType = None
-        tDate = None
-        for child in xml:
-            if child.tag == "type":
-                tType = child.text
-            if child.tag == "date":
-                tDate = child.text
-        if any([tType == None, tDate==None]):
-            raise RuntimeError("Cannot parse Transaction", ElementTree.tostring(xml, encoding='utf8', method='xml') )
-        
-        # is there a crossentry that needs processing?
-        crossEntry = xml.find("crossEntry")
-        if crossEntry != None and "class" in crossEntry.attrib:
-            CrossEntry.crossEntryQueue.append(crossEntry)
-        
-        return Transaction(xml, tType, tDate)
+    def parse(content):
+        if "@reference" in content.keys():
+            return Transaction(content, content['@reference'])
 
+        transaction = Transaction(content, None)
+
+        # Potential tasks
+        ## Resolve "security" reference if field "security" exists
+        transaction.computeSecurity()
+        
+        ## Continue if there is a "crossEntry" in there
+        if 'crossEntry' in content:
+            content['crossEntry']['referencePath'] = content['referencePath'] + '/crossEntry'
+            CrossEntry.parse(content['crossEntry'])
+        
+        return transaction
 
 from .classSecurity import *
 from .classCrossEntry import *
 from .classDateObject import *
+from .classPortfolio import *
 from .helpers import *

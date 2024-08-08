@@ -10,12 +10,36 @@ class Depot(PortfolioPerformanceObject):
     currentDepot = None
     scale = 100000000
 
-    def __init__(self, name, xml):
-        self.name = name
-        self.xml = xml
+    def __init__(self, content, reference=None):
+        self.reference = reference
         self.transactions = []
         self.depotSecurities = None 
-        Depot.depotMap[name] = self
+        self.content = content
+        Portfolio.currentPortfolio.registerPath(content['referencePath'], self)
+        
+        if reference != None:
+            return
+
+        self.name = content['name']
+        self.uuid = content['uuid']
+        Depot.depotMap[self.name] = self
+        Portfolio.currentPortfolio.registerUuid(content['uuid'], self)
+
+    def copy_from(self, other):
+        other.resolveReference()
+        
+        self.uuid = other.uuid
+        self.name = other.name
+        self.depotSecurities = other.depotSecurities 
+        self.content = other.content
+        self.reference = other.reference
+        self.transactions = other.transactions
+
+    def resolveReference(self):
+        super().resolveReference()
+        
+        for transaction in self.transactions:
+            transaction.resolveReference()
 
     def getName(self):
         """
@@ -67,23 +91,36 @@ class Depot(PortfolioPerformanceObject):
         return self.depotSecurities
 
     @staticmethod
-    def parseByXml(depot):
-        name = depot.find("name")
-        rslt = Depot.getDepotByName(name.text)
-        rslt.xml = depot
-        Depot.currentDepot = rslt
-                
-        transactionRoot = depot.find("transactions")
-        for transact in transactionRoot:
-            theTransaction = DepotTransaction.parse(transactionRoot, transact)
-            if theTransaction==None:
-                continue
-            rslt.transactions.append(theTransaction)
-
-        #rslt.processCrossEntries()
+    def parse(content):
+        if "@reference" in content.keys():
+            return Depot(content, content['@reference'])
+        
+        rslt = Depot(content)
+        rslt._parseTransactions(content)
+        
+        if 'referenceAccount' in content:
+            content['referenceAccount']['referencePath'] = content['referencePath'] + '/referenceAccount'
+            Account.parse(content['referenceAccount'])
 
         return rslt
-        
+    
+    def _parseTransactions(self, content):
+        num = 1
+        for transact in content['transactions']['portfolio-transaction']:
+            transact['depot'] = self
+            if not 'referencePath' in content:
+                content['referencePath'] = '../portfolio'
+            if num == 1:
+                transact['referencePath'] = content['referencePath'] + '/transactions/portfolio-transaction'
+            else:
+                transact['referencePath'] = content['referencePath'] + '/transactions/portfolio-transaction[%d]' % num
+            transact['account'] = None
+            transactionObject = Transaction.parse(transact)
+            if 'uuid' in transact:
+                Portfolio.currentPortfolio.registerUuid(transact['uuid'], transactionObject)
+            self.transactions.append(transactionObject)
+            num += 1
+
     def getTransactions(self):
         """
         :return: list of transactions in the depot.
@@ -96,3 +133,6 @@ class Depot(PortfolioPerformanceObject):
 
 
 from .classDepotTransaction import *
+from .classPortfolio import *
+from .classTransaction import *
+from .classAccount import *

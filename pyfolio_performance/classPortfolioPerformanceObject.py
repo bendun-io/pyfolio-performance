@@ -1,3 +1,7 @@
+import re
+
+arrayRegex = re.compile(r"\[(\d+)\]$")
+
 class PortfolioPerformanceObject:
     """
     Base class for most objects in the library.
@@ -41,13 +45,6 @@ class PortfolioPerformanceObject:
             self.__class__._attribObjectMap[name] = {}
         self.__class__._attribObjectMap[name][value] = self
 
-    def parseAttributes(self):
-        for name in self._attributeList:
-            txt = self.xml.find(name)
-            if txt == None:
-                continue
-            self._setAttribute(name, txt.text)
-
     @classmethod
     def getObjectByAttribute(cls, attr, value):
         """
@@ -69,16 +66,23 @@ class PortfolioPerformanceObject:
         if not value in attrMap:
             return
         return attrMap[value]
+    
+    def securityPatternMatch(match):
+        from .classSecurity import Security
+        return Security.getSecurityByNum(int(match.group(2)))
 
-
+    referencePatterns = {
+        re.compile(r"(\.\./)*securities/security\[(\d+)\]$"): securityPatternMatch 
+    }
+    
     @classmethod
     def parseByReference(cls, root, reference):
         """
         This methods resolves the attribute referenced.
         It returns the parsed result of the referenced xml.
 
-        :param root: Root from where the reference is searched in the XML.
-        :type root: xml
+        :param root: Root of the parsing, in case it is needed to resolve references.
+        :type root: Portfolio
 
         :param reference: Encoding of the reference
         :type reference: str
@@ -86,39 +90,89 @@ class PortfolioPerformanceObject:
         :return: Parsed object.
         :type: Subclass of PortfolioPerformanceObject
         """
+        for pattern in PortfolioPerformanceObject.referencePatterns.keys():
+            match = pattern.search(reference)
+            if match:
+                return PortfolioPerformanceObject.referencePatterns[pattern](match)
+        
         rslt = None
 
-        for x in root.findall(reference[cls.referenceSkip:]):
-            rslt = cls.parse(root, x)
-            if rslt != None:
-                break
+        # Example:       
+        # "@reference": "../../accounts/account/transactions/account-transaction[2]/crossEntry/portfolio/transactions/portfolio-transaction[40]/crossEntry/account/transactions/account-transaction[11]/crossEntry/portfolio"
+        # reference.replace("../", "")
+        steps = reference.split("/")
+        
+        position = root #.content['client']
+        num = 0
+        try:
+            for step in steps:
+                if step == "..":
+                    continue
+                match = arrayRegex.search(step)
+                if match:
+                    index = int(match.group(1))
+                    position = position[step.split("[")[0]]
+                    position = position[index]
+                else:
+                    try:
+                        position = position[step]
+                    except:
+                        position = position[0][step]
+                num += 1
+        except Exception as e:
+            if step == "crossEntry":
+                print("NOT YET IMPLEMENTED CrossEntry")
+                return None
+            print()
+            print("Position: " + str(position))
+            print("Error in resolving reference: " + str(reference) + " at " + str(step))
+            print("Type: " + str(type(position)))
+            print("Keys: "  + str(position.keys()))
+            print("Num: " + str(num))
+            print()
+            exit(-1)
+
+        rslt = cls.parse(root, position)
 
         return rslt
 
     @classmethod
-    def parse(cls, root, xml):
+    def parse(cls, parentNode, data: dict) -> 'PortfolioPerformanceObject':
         """
         This methods parses portfolio performance objects.
         It returns the parsed result of the referenced xml.
 
         :param root: Root of the parsing, in case it is needed to resolve references.
-        :type root: xml
+        :type root: Portfolio
 
-        :param xml: Object to be parsed.
-        :type xml: xml
+        :param data: Object to be parsed.
+        :type data: dict object
 
         :return: Parsed object.
         :type: Subclass of PortfolioPerformanceObject
         """
-        if xml in cls.parsed:
-            return cls.parsed[xml]
-        
         rslt = None
-        if 'reference' in xml.attrib:
-            rslt = cls.parseByReference(root, xml.attrib['reference'])
+        if '@reference' in data.keys():
+            rslt = cls.parseByReference(parentNode, data['@reference'])
         else:
-            rslt = cls.parseByXml(xml)
-            rslt.parseAttributes()
+            rslt = cls.parseContent(data)
+            # rslt.parseAttributes()
 
-        cls.parsed[xml] = rslt
         return rslt
+    
+    def copy_from(self, other):
+        copy_from(self, other)
+    
+    def resolveReference(self):
+        if self.reference == None:
+            return
+        combined = combinePaths( self.content['referencePath'], self.reference)
+        
+        other = Portfolio.currentPortfolio.getObjectByPath(combined)
+        if other == None:
+            raise RuntimeError(f"Cannot resolve reference [{self.__class__}]: " + str(combined) + " from " + str(self.reference))
+        
+        self.copy_from(other)
+        
+from .helpers import *
+from .classPortfolio import *
