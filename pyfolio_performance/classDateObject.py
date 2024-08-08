@@ -42,4 +42,4 @@ class DateObject:
         :return: Returns the date string the same way portfolio performance uses it in the XML.
         :type: str
         """
-        return "%d-%d-%d" % (self.getYear, self.getMonth, self.getDay)
+        return "%d-%d-%d" % (self.getYear(), self.getMonth(), self.getDay())

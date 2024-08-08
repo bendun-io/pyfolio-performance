@@ -6,6 +6,9 @@ class Transaction(PortfolioPerformanceObject):
     negative = ['TRANSFER_OUT', 'REMOVAL', 'INTEREST_CHARGE', 'FEES', 'TAXES', 'BUY']
     positive = ['INTEREST', 'DEPOSIT', 'TRANSFER_IN', 'DIVIDENDS', 'SELL', 'FEES_REFUND']
 
+    negativeDepot = ["DELIVERY_OUTBOUND", "SELL", "TRANSFER_OUT"]
+    positiveDepot = ["BUY", "DELIVERY_INBOUND", "TRANSFER_IN"]
+
     sourceMap = {
         'TRANSFER_IN': lambda x: 'Transfer',
         'TRANSFER_OUT': lambda x: 'Transfer',
@@ -38,6 +41,13 @@ class Transaction(PortfolioPerformanceObject):
         self.type = content['type']
         self.date = DateObject(content['date'])
     
+    def copy_from(self, other):
+        self.reference = other.reference
+        self._account = other._account
+        self.type = other.type
+        self.date = other.date
+        self.content = other.content
+    
     def to_dict(self):
         return {"content": self.content, "reference": self.reference}
         
@@ -46,7 +56,10 @@ class Transaction(PortfolioPerformanceObject):
         :return: String representation of the transaction of the form Transaction(TYPE, DATE).
         :type: str
         """
-        return "Transaction(%s, %s)" % (self.type, str(self.date))
+        try:
+            return "Transaction(%s, %s)" % (self.type, str(self.date))
+        except:
+            return "Transaction without type or date"
 
     def setAccount(self, account):
         """
@@ -125,7 +138,8 @@ class Transaction(PortfolioPerformanceObject):
         return self.getSecurity().getName() # dont know the type of transaction
 
     def getSecurity(self):
-        return self.computeSecurity()
+        self.computeSecurity()
+        return self.security
 
     securityPattern = re.compile(r"(\.\./)*securities/security\[(\d+)\]$")
     def computeSecurity(self):
@@ -145,6 +159,17 @@ class Transaction(PortfolioPerformanceObject):
             return True
 
         raise RuntimeError("Security could not be resolved for transaction pattern '%s'" % security)
+
+    def getSecurityChange(self):
+        if not self.computeSecurity():
+            raise RuntimeError("Security could not be resolved for transaction")
+        
+        val = int(self.content["shares"])
+        if self.type in Transaction.negativeDepot:
+            val = -val
+        elif self.type not in Transaction.positiveDepot:
+            print(self.type, val)
+        return (self.security, val)
 
     #   {
     #     "uuid": "6ff55ee0-f3c7-410c-812b-424ad293ce97",

@@ -47,23 +47,6 @@ class Account(PortfolioPerformanceObject):
         return self.transactions
 
     @staticmethod
-    def parseByXml(content):
-        acc = Account(content["uuid"], content["name"])
-        # acc.content = content
-        transactionRoot = content["transactions"]
-        for transact in transactionRoot:
-            transactionObject = Transaction.parse(transactionRoot, transact)
-            transactionObject.setAccountName(acc.name)
-            acc.transactions.append(transactionObject)
-        return acc
-
-    # @staticmethod
-    # def parseContent(content):
-    #     if "@reference" in content.keys():
-    #         raise Exception("This method should not be called for Account references")
-    #     return Account(content['uuid'], content['name'])
-
-    @staticmethod
     def parse(content):
         if 'referencePath' not in content:
             content['referencePath'] = 'client/accounts/account'

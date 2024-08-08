@@ -28,6 +28,7 @@ class CrossEntry(PortfolioPerformanceObject):
         
         # Other depot should already be resolved, but resolving is idempontent, lets be sure
         otherDepot.resolveReference()
+        transaction.resolveReference()
         otherDepot.transactions.append(transaction)
 
     @staticmethod
@@ -39,6 +40,7 @@ class CrossEntry(PortfolioPerformanceObject):
 
         # Other depot should already be resolved, but resolving is idempontent, lets be sure
         otherDepot.resolveReference()
+        transactionFrom.resolveReference()
         otherDepot.transactions.append(transactionFrom)
 
 

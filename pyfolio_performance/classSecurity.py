@@ -59,14 +59,17 @@ class Security(PortfolioPerformanceObject):
         if self.mostRecentValue != None:
             return self.mostRecentValue
         
-        priceList = self.data["prices"]
+        priceList = self.data["prices"]['price']
         if priceList == None:
             print("No price list found for %s" % str(self))
             return 0
         newestDate = DateObject("0000-00-00")
         newestXml = None
+        
         for price in priceList:
-            priceDate = DateObject(price['@t'])
+            if isinstance(price, str): # skip the text elements
+                continue
+            priceDate = DateObject(price["@t"])
             if priceDate.getOrderValue() < newestDate.getOrderValue():
                 continue
             newestDate = priceDate

@@ -21,6 +21,12 @@ class Portfolio:
         self._parseAccounts()
         self._parseDepots()
         CrossEntry.processCrossEntries()
+        
+        # Ensuring every reference is resolved
+        for dep in self.depotList:
+            dep.resolveReference()
+        for acc in self.accList:
+            acc.resolveReference()
 
     def _parseSecurities(self):
         self.securityList = []
@@ -103,12 +109,6 @@ class Portfolio:
         :type: list(Security)
         """
         return self.securityList
-        # depotSecurities = []
-        # for depot in self.getDepots():
-        #     for sec in depot.getSecurities().keys():
-        #         if sec not in depotSecurities:
-        #             depotSecurities.append(sec)
-        # return depotSecurities
 
     def getShares(self, theSecurity):
         """
