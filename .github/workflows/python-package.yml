@@ -37,6 +37,6 @@ jobs:
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
 
-    - name: Upload to PyPI
-      run: |
-        python -m twine upload --skip-existing dist/*.whl
+    # - name: Upload to PyPI
+    #   run: |
+    #     python -m twine upload --skip-existing dist/*.whl
