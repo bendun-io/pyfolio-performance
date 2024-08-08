@@ -1,3 +1,5 @@
+import xmltodict
+
 class Portfolio:
     """
     The main class to parse and access different aspects of a portfolio stored in a XML file.
@@ -193,8 +195,6 @@ class Portfolio:
 from .classCrossEntry import *
 from .classDepot import *
 from .classAccount import *
-import xml.etree.ElementTree as ElementTree
 from .helpers import *
 
 from pyfolio_performance.classFilters import Filters
-import xmltodict

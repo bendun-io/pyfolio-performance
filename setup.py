@@ -15,7 +15,7 @@ with open(path.join(HERE, 'README.md'), encoding='utf-8') as f:
 # This call to setup() does all the work
 setup(
     name="pyfolio-performance",
-    version="0.2.1",
+    version="0.2.2",
     description="Portfolio Performance library",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -36,5 +36,5 @@ setup(
     ],
     packages=["pyfolio_performance"],
     include_package_data=True,
-    install_requires=["et-xmlfile"]
+    install_requires=["xmltodict"]
 )
