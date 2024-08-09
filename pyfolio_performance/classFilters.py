@@ -1,4 +1,4 @@
-from .classDepotTransaction import DepotTransaction
+from .classTransaction import Transaction
 
 class Filters:
     """
@@ -33,8 +33,8 @@ class Filters:
         :return: A filter function that ensures the entry is a Depot Transaction.
         :type: Entry -> bool
         """
-        return lambda x: False if not isinstance(x, DepotTransaction) else True
-
+        return lambda x: False if not isinstance(x, Transaction) else x.hasSecurity()
+        
     @staticmethod
     def fSecurityTransaction(sec):
         """

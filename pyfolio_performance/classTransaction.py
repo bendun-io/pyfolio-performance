@@ -85,10 +85,15 @@ class Transaction(PortfolioPerformanceObject):
             if self.type in Transaction.negative:
                 val = -val
             elif self.type not in Transaction.positive:
-                print(self.type, val)
+                val = self.getSecurityBasedValue()
         except AttributeError:
             print(self.content)
         return val
+
+    def getSecurityBasedValue(self):
+        if self.type not in Transaction.positiveDepot and self.type not in Transaction.negativeDepot:
+            print(self.type, int(self.content["amount"]))
+        return self.getShares() * self.getSecurity().getMostRecentValue()
 
     def getAmount(self):
         return int(self.content["amount"])
@@ -140,6 +145,9 @@ class Transaction(PortfolioPerformanceObject):
     def getSecurity(self):
         self.computeSecurity()
         return self.security
+
+    def hasSecurity(self):
+        return self.computeSecurity()
 
     securityPattern = re.compile(r"(\.\./)*securities/security\[(\d+)\]$")
     def computeSecurity(self):
