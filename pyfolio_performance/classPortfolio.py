@@ -153,7 +153,7 @@ class Portfolio:
         """
 
         clusters = {'value': 0}
-        myFilter = Filters.fSecurityTransaction
+        myFilter = Filters.fSecurityTransaction(security)
         if before != None:
             myFilter = Filters.fAnd(myFilter, Filters)
 

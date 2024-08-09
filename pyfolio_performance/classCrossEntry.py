@@ -93,5 +93,4 @@ class CrossEntry(PortfolioPerformanceObject):
 
 from .helpers import *
 from .classDepot import *
-from .classDepotTransaction import *
 from .classAccount import *

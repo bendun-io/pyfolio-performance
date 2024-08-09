@@ -132,7 +132,6 @@ class Depot(PortfolioPerformanceObject):
         return "Depot/%s" % self.name
 
 
-from .classDepotTransaction import *
 from .classPortfolio import *
 from .classTransaction import *
 from .classAccount import *

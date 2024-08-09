@@ -90,6 +90,9 @@ class Transaction(PortfolioPerformanceObject):
             print(self.content)
         return val
 
+    # def getValue(self):
+    #     return self.getShares() * self.getSecurity().getMostRecentValue()
+
     def getAmount(self):
         return int(self.content["amount"])
 
@@ -140,6 +143,9 @@ class Transaction(PortfolioPerformanceObject):
     def getSecurity(self):
         self.computeSecurity()
         return self.security
+
+    def hasSecurity(self):
+        return self.computeSecurity()
 
     securityPattern = re.compile(r"(\.\./)*securities/security\[(\d+)\]$")
     def computeSecurity(self):
